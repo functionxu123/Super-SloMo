@@ -7,7 +7,7 @@ import random
 # For parsing commandline arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--ffmpeg_dir", type=str, required=True, help='path to ffmpeg.exe')
-parser.add_argument("--dataset", type=str, default="custom", help='specify if using "adobe240fps" or custom video dataset')
+parser.add_argument("--dataset", type=str, default="adobe240fps", help='specify if using "adobe240fps" or custom video dataset')
 parser.add_argument("--videos_folder", type=str, required=True, help='path to the folder containing videos')
 parser.add_argument("--dataset_folder", type=str, required=True, help='path to the output dataset folder')
 parser.add_argument("--img_width", type=int, default=640, help="output image width")
@@ -37,7 +37,10 @@ def extract_frames(videos, inDir, outDir):
 
     for video in videos:
         os.mkdir(os.path.join(outDir, os.path.splitext(video)[0]))
-        retn = os.system('{} -i {} -vf scale={}:{} -vsync 0 -qscale:v 2 {}/%04d.jpg'.format(os.path.join(args.ffmpeg_dir, "ffmpeg"), os.path.join(inDir, video), args.img_width, args.img_height, os.path.join(outDir, os.path.splitext(video)[0])))
+        cmdstr='{} -i {} -vf scale={}:{} -vsync 0 -qscale:v 2 {}/%04d.jpg'.format(os.path.join(args.ffmpeg_dir, "ffmpeg"),\
+                 os.path.join(inDir, video), args.img_width, args.img_height, os.path.join(outDir, os.path.splitext(video)[0]))
+        print(cmdstr)
+        retn = os.system(cmdstr)
         if retn:
             print("Error converting file:{}. Exiting.".format(video))
 
@@ -58,6 +61,9 @@ def create_clips(root, destination):
     -------
         None
     """
+    '''
+    :将每个视频中每12帧抽出来放到一个文件夹里，这些输出文件夹用序号表明，放到destination同一层目录下
+    '''
 
 
     folderCounter = -1
