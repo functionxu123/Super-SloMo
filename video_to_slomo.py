@@ -140,10 +140,14 @@ def main():
     videoFramesloader = torch.utils.data.DataLoader(videoFrames, batch_size=args.batch_size, shuffle=False)
 
     # Initialize model
+    #第一个unet，用于计算光流
     flowComp = model.UNet(6, 4)
     flowComp.to(device)
+    
+    #这里只需要inference，去掉训练bp
     for param in flowComp.parameters():
         param.requires_grad = False
+    #第二个UNET，用于合成 
     ArbTimeFlowIntrp = model.UNet(20, 5)
     ArbTimeFlowIntrp.to(device)
     for param in ArbTimeFlowIntrp.parameters():
@@ -151,7 +155,7 @@ def main():
     
     flowBackWarp = model.backWarp(videoFrames.dim[0], videoFrames.dim[1], device)
     flowBackWarp = flowBackWarp.to(device)
-
+    #加载模型的checkpoint
     dict1 = torch.load(args.checkpoint, map_location='cpu')
     ArbTimeFlowIntrp.load_state_dict(dict1['state_dictAT'])
     flowComp.load_state_dict(dict1['state_dictFC'])
@@ -159,13 +163,18 @@ def main():
     # Interpolate frames
     frameCounter = 1
 
+    '''
+    Tqdm 是一个快速，可扩展的Python进度条，可以在 Python 长循环中添加一个进度提示信息，用户只需要封装任意的迭代器 tqdm(iterator)。 
+    '''
     with torch.no_grad():
         for _, (frame0, frame1) in enumerate(tqdm(videoFramesloader), 0):
 
             I0 = frame0.to(device)
             I1 = frame1.to(device)
-
+            
+            #!!!!实现细节：在dim1连接起来！！！！
             flowOut = flowComp(torch.cat((I0, I1), dim=1))
+            #flowout中应该是前0，1维度为0-》1的光流，2，3维度为1-》0光流
             F_0_1 = flowOut[:,:2,:,:]
             F_1_0 = flowOut[:,2:,:,:]
 
@@ -186,6 +195,7 @@ def main():
                 g_I0_F_t_0 = flowBackWarp(I0, F_t_0)
                 g_I1_F_t_1 = flowBackWarp(I1, F_t_1)
                 
+                #将上面一堆参数连接起来，送入下一个预测网络中
                 intrpOut = ArbTimeFlowIntrp(torch.cat((I0, I1, F_0_1, F_1_0, F_t_1, F_t_0, g_I1_F_t_1, g_I0_F_t_0), dim=1))
                     
                 F_t_0_f = intrpOut[:, :2, :, :] + F_t_0
