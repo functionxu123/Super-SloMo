@@ -92,9 +92,12 @@ def main():
     # Create extraction folder and extract frames
     IS_WINDOWS = 'Windows' == platform.system()
     extractionDir = "tmpSuperSloMo"
+    
+    #这里需要有个文件夹放截出来的帧，其实没必要费力去把这个文件夹搞成隐藏的
     if not IS_WINDOWS:
         # Assuming UNIX-like system where "." indicates hidden directories
         extractionDir = "." + extractionDir
+    
     if os.path.isdir(extractionDir):
         rmtree(extractionDir)
     os.mkdir(extractionDir)
@@ -126,7 +129,7 @@ def main():
     # Temporary fix for issue #7 https://github.com/avinashpaliwal/Super-SloMo/issues/7 -
     # - Removed per channel mean subtraction for CPU.
     if (device == "cpu"):
-        transform = transforms.Compose([transforms.ToTensor()])
+        transform = transforms.Compose([transforms.ToTensor()]) #添加一个转化函数，后面用于对每个img做filter
         TP = transforms.Compose([transforms.ToPILImage()])
     else:
         transform = transforms.Compose([transforms.ToTensor(), normalize])

@@ -96,6 +96,7 @@ def _pil_loader(path, cropArea=None, resizeDim=None, frameFlip=0):
         # Resize image if specified.
         resized_img = img.resize(resizeDim, Image.ANTIALIAS) if (resizeDim != None) else img
         # Crop image if crop area specified.
+        #如果cropArea不为空，那么resize会被忽略？
         cropped_img = img.crop(cropArea) if (cropArea != None) else resized_img
         # Flip image horizontally if specified.
         flipped_img = cropped_img.transpose(Image.FLIP_LEFT_RIGHT) if frameFlip else cropped_img
@@ -461,7 +462,7 @@ class Video(data.Dataset):
         # Get dimensions of frames
         frame        = _pil_loader(framesPath[0])
         self.origDim = frame.size
-        self.dim     = int(self.origDim[0] / 32) * 32, int(self.origDim[1] / 32) * 32
+        self.dim     = int(self.origDim[0] / 32) * 32, int(self.origDim[1] / 32) * 32 #取32整数倍
 
         # Raise error if no images found in root.
         if len(framesPath) == 0:
@@ -472,6 +473,7 @@ class Video(data.Dataset):
         self.transform      = transform
 
     def __getitem__(self, index):
+        #返回index处的图和其后一张图组成的list  [index_data, (index+1)_data]
         """
         Returns the sample corresponding to `index` from dataset.
 
@@ -511,7 +513,7 @@ class Video(data.Dataset):
             int
                 number of samples.
         """
-
+        #为了与__getitem__配合，这里len要减一
 
         # Using `-1` so that dataloader accesses only upto
         # frames [N-1, N] and not [N, N+1] which because frame
