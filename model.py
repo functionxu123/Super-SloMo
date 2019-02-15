@@ -43,6 +43,7 @@ class down(nn.Module):
 
         super(down, self).__init__()
         # Initialize convolutional layers.
+        #out h/w = input h/w
         self.conv1 = nn.Conv2d(inChannels,  outChannels, filterSize, stride=1, padding=int((filterSize - 1) / 2))
         self.conv2 = nn.Conv2d(outChannels, outChannels, filterSize, stride=1, padding=int((filterSize - 1) / 2))
            
@@ -104,6 +105,7 @@ class up(nn.Module):
         
         super(up, self).__init__()
         # Initialize convolutional layers.
+        #in hw=out hw
         self.conv1 = nn.Conv2d(inChannels,  outChannels, 3, stride=1, padding=1)
         # (2 * outChannels) is used for accommodating skip connection.
         self.conv2 = nn.Conv2d(2 * outChannels, outChannels, 3, stride=1, padding=1)
@@ -127,6 +129,7 @@ class up(nn.Module):
         """
 
         # Bilinear interpolation with scaling 2.
+        #h and w *2
         x = F.interpolate(x, scale_factor=2, mode='bilinear')
         # Convolution + Leaky ReLU
         x = F.leaky_relu(self.conv1(x), negative_slope = 0.1)
