@@ -276,6 +276,7 @@ class backWarp(nn.Module):
         # Extract horizontal and vertical flows.
         u = flow[:, 0, :, :]
         v = flow[:, 1, :, :]
+        #unsqueeze:add a dim to var,eg:shape of a=[2,3] a.unsqueeze(1) --> shape is [2,1,3]
         x = self.gridX.unsqueeze(0).expand_as(u).float() + u
         y = self.gridY.unsqueeze(0).expand_as(v).float() + v
         # range -1 to 1
