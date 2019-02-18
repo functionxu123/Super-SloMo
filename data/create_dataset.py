@@ -6,10 +6,10 @@ import random
 
 # For parsing commandline arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("--ffmpeg_dir", type=str, required=True, help='path to ffmpeg.exe')
+parser.add_argument("--ffmpeg_dir", type=str, default="/usr/bin/", help='path to ffmpeg.exe')
 parser.add_argument("--dataset", type=str, default="adobe240fps", help='specify if using "adobe240fps" or custom video dataset')
-parser.add_argument("--videos_folder", type=str, required=True, help='path to the folder containing videos')
-parser.add_argument("--dataset_folder", type=str, required=True, help='path to the output dataset folder')
+parser.add_argument("--videos_folder", type=str, default="/media/sherl/本地磁盘/data_DL/Adobe240fps/original_high_fps_videos", help='path to the folder containing videos')
+parser.add_argument("--dataset_folder", type=str, default="/media/sherl/本地磁盘/data_DL/Adobe240fps/extracted_videos", help='path to the output dataset folder')
 parser.add_argument("--img_width", type=int, default=640, help="output image width")
 parser.add_argument("--img_height", type=int, default=360, help="output image height")
 parser.add_argument("--train_test_split", type=tuple, default=(90, 10), help="train test split for custom dataset")
