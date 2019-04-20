@@ -296,7 +296,7 @@ t = np.linspace(0.125, 0.875, 7)#t=array([0.125, 0.25 , 0.375, 0.5  , 0.625, 0.7
 
 def getFlowCoeff (indices, device):
     """
-    Gets flow coefficients used for calculating intermediate optical
+    Gets flow coefficients（系数） used for calculating intermediate optical
     flows from optical flows between I0 and I1: F_0_1 and F_1_0.
 
     F_t_0 = C00 x F_0_1 + C01 x F_1_0
