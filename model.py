@@ -285,6 +285,7 @@ class backWarp(nn.Module):
         # stacking X and Y
         grid = torch.stack((x,y), dim=3)
         # Sample pixels using bilinear interpolation.
+        #torch.nn.functional.grid_sample:对于output上的每一个点，（x,y）三个通道的像素值，采集自input上某一点三个通道的像素值，采集哪个点呢，坐标存储在grid最低维
         imgOut = torch.nn.functional.grid_sample(img, grid)
         return imgOut
 
@@ -362,11 +363,12 @@ def getWarpCoeff (indices, device):
 
     # Convert indices tensor to numpy array
     ind = indices.detach().numpy()
+    #ind=indices
     C0 = 1 - t[ind]
     C1 = t[ind]
     return torch.Tensor(C0)[None, None, None, :].permute(3, 0, 1, 2).to(device), torch.Tensor(C1)[None, None, None, :].permute(3, 0, 1, 2).to(device)
 
-
+#getWarpCoeff(1,'cpu')
 
 
 
