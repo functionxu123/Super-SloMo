@@ -15,13 +15,13 @@ from tqdm import tqdm
 
 # For parsing commandline arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("--ffmpeg_dir", type=str, default="", help='path to ffmpeg.exe')
-parser.add_argument("--video", type=str, required=True, help='path of video to be converted')
-parser.add_argument("--checkpoint", type=str, required=True, help='path of checkpoint for pretrained model')
+parser.add_argument("--ffmpeg_dir", type=str, default="/usr/bin/", help='path to ffmpeg.exe')
+parser.add_argument("--video", type=str, default="/home/sherl/workspaces/git/use_tensorflow/use_tensor/GAN_slomo/testing_gif/original.mp4", help='path of video to be converted')
+parser.add_argument("--checkpoint", type=str, default="SuperSloMo.ckpt", help='path of checkpoint for pretrained model')
 parser.add_argument("--fps", type=float, default=30, help='specify fps of output video. Default: 30.')
-parser.add_argument("--sf", type=int, required=True, help='specify the slomo factor N. This will increase the frames by Nx. Example sf=2 ==> 2x frames')
+parser.add_argument("--sf", type=int, default=12, help='specify the slomo factor N. This will increase the frames by Nx. Example sf=2 ==> 2x frames')
 parser.add_argument("--batch_size", type=int, default=1, help='Specify batch size for faster conversion. This will depend on your cpu/gpu memory. Default: 1')
-parser.add_argument("--output", type=str, default="output.mp4", help='Specify output file name. Default: output.mp4')
+parser.add_argument("--output", type=str, default="nvidia_output.mp4", help='Specify output file name. Default: nvidia_output.mp4')
 args = parser.parse_args()
 
 def check():

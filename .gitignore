@@ -109,3 +109,5 @@ output.mp4
 
 # ignore folder
 tmpSuperSloMo/
+/SuperSloMo.ckpt
+/nvidia_output.mp4
