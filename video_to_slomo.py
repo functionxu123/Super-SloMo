@@ -192,7 +192,8 @@ def main():
 
                 F_t_0 = fCoeff[0] * F_0_1 + fCoeff[1] * F_1_0
                 F_t_1 = fCoeff[2] * F_0_1 + fCoeff[3] * F_1_0
-
+                
+                #第一个unet的初步结果，先看看这里的效果和我第一步骤对比
                 g_I0_F_t_0 = flowBackWarp(I0, F_t_0)
                 g_I1_F_t_1 = flowBackWarp(I1, F_t_1)
                 
@@ -209,7 +210,12 @@ def main():
                 
                 wCoeff = [1 - t, t]
 
+                #注意这里将mask加入到两帧合成上的方式，还加入了时间序列
                 Ft_p = (wCoeff[0] * V_t_0 * g_I0_F_t_0_f + wCoeff[1] * V_t_1 * g_I1_F_t_1_f) / (wCoeff[0] * V_t_0 + wCoeff[1] * V_t_1)
+                
+                #这里看看他的中间结果怎么样?
+                #Ft_p = (wCoeff[0] * g_I0_F_t_0 + wCoeff[1] * g_I1_F_t_1)
+                #结果虽然时序上感觉有点抖动，但是清晰度上却是相当好，应该是loss函数的问题
 
                 # Save intermediate frame
                 #保存中间插入的帧
