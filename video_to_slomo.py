@@ -179,6 +179,7 @@ def main():
             F_1_0 = flowOut[:,2:,:,:]
 
             # Save reference frames in output folder
+            #保存原始视频帧
             for batchIndex in range(args.batch_size):
                 (TP(frame0[batchIndex].detach())).resize(videoFrames.origDim, Image.BILINEAR).save(os.path.join(outputPath, str(frameCounter + args.sf * batchIndex) + ".jpg"))
             frameCounter += 1
@@ -211,6 +212,7 @@ def main():
                 Ft_p = (wCoeff[0] * V_t_0 * g_I0_F_t_0_f + wCoeff[1] * V_t_1 * g_I1_F_t_1_f) / (wCoeff[0] * V_t_0 + wCoeff[1] * V_t_1)
 
                 # Save intermediate frame
+                #保存中间插入的帧
                 for batchIndex in range(args.batch_size):
                     (TP(Ft_p[batchIndex].cpu().detach())).resize(videoFrames.origDim, Image.BILINEAR).save(os.path.join(outputPath, str(frameCounter + args.sf * batchIndex) + ".jpg"))
                 frameCounter += 1
