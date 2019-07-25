@@ -65,6 +65,9 @@ mean = [0.429, 0.431, 0.397]
 std  = [1, 1, 1]
 normalize = transforms.Normalize(mean=mean,
                                  std=std)
+
+#这里transform.ToTensor()将0-255的图片转化为0-1    transforms.ToTensor():Converts a PIL Image or numpy.ndarray (H x W x C) in the range[0, 255] 
+#to a torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0]
 transform = transforms.Compose([transforms.ToTensor(), normalize])
 
 trainset = dataloader.SuperSloMo(root=args.dataset_root + '/train', transform=transform, train=True)
