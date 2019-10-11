@@ -112,3 +112,5 @@ tmpSuperSloMo/
 /SuperSloMo.ckpt
 /nvidia_output.mp4
 /nvidia_output_ori.mp4
+/UCF101_results.zip
+/UCF101_results/
