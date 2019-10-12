@@ -33,6 +33,15 @@ args = parser.parse_args()
 
 ##[TensorboardX](https://github.com/lanpa/tensorboardX)
 ### For visualizing loss and interpolated frames
+'''
+Method    PSNR    SSIM    IE
+DVF    29.37    0.861    16.37
+SepConv - L_1    30.18    0.875    15.54
+SepConv - L_F    30.03    0.869    15.78
+SuperSloMo_Adobe240fps    29.80    0.870    15.68
+pretrained mine    29.77    0.874    15.58
+SuperSloMo    30.22    0.880    15.18
+'''
 
 
 writer = SummaryWriter('log')
