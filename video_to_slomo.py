@@ -14,6 +14,7 @@ import platform
 from tqdm import tqdm
 import cv2,skimage
 import numpy as np
+import os.path as op
 
 # For parsing commandline arguments
 parser = argparse.ArgumentParser()
@@ -21,7 +22,7 @@ parser.add_argument("--ffmpeg_dir", type=str, default="/usr/bin/", help='path to
 parser.add_argument("--video", type=str, default="/home/sherl/workspaces/git/use_tensorflow/use_tensor/GAN_slomo/testing_gif/car-turn.mp4", help='path of video to be converted')
 parser.add_argument("--checkpoint", type=str, default="SuperSloMo.ckpt", help='path of checkpoint for pretrained model')
 parser.add_argument("--fps", type=float, default=30, help='specify fps of output video. Default: 30.')
-parser.add_argument("--sf", type=int, default=2, help='specify the slomo factor N. This will increase the frames by Nx. Example sf=2 ==> 2x frames')
+parser.add_argument("--sf", type=int, default=32, help='specify the slomo factor N. This will increase the frames by Nx. Example sf=2 ==> 2x frames')
 parser.add_argument("--batch_size", type=int, default=1, help='Specify batch size for faster conversion. This will depend on your cpu/gpu memory. Default: 1')
 parser.add_argument("--output", type=str, default="nvidia_output.mp4", help='Specify output file name. Default: nvidia_output.mp4')
 args = parser.parse_args()
@@ -235,54 +236,48 @@ def main():
     rmtree(extractionDir)
 
     exit(0)
-    
-def evaluate():
-    # Check if arguments are okay
-    error = check()
-    if error:
-        print(error)
-        exit(1)
 
-    # Create extraction folder and extract frames
-    IS_WINDOWS = 'Windows' == platform.system()
-    extractionDir = "tmpSuperSloMo"
+extractionDir = "tmpSuperSloMo"
+def evaluate_video(invideopath):  
+    # Check if arguments are okay
     
     #这里需要有个文件夹放截出来的帧，其实没必要费力去把这个文件夹搞成隐藏的
-    '''
-    if not IS_WINDOWS:
-        # Assuming UNIX-like system where "." indicates hidden directories
-        extractionDir = "." + extractionDir
-    '''
-    
     if os.path.isdir(extractionDir):
         rmtree(extractionDir)
     os.mkdir(extractionDir)
-    '''
-    if IS_WINDOWS:
-        FILE_ATTRIBUTE_HIDDEN = 0x02
-        # ctypes.windll only exists on Windows
-        ctypes.windll.kernel32.SetFileAttributesW(extractionDir, FILE_ATTRIBUTE_HIDDEN)
-    '''
 
     extractionPath = os.path.join(extractionDir, "input")
-    outputPath     = os.path.join(extractionDir, "output")
+
     os.mkdir(extractionPath)
-    os.mkdir(outputPath)
-    error = extract_frames(args.video, extractionPath)
+
+    error = extract_frames(invideopath, extractionPath)
     if error:
         print(error)
         exit(1)
-        
-    gt_dir=os.path.join(extractionDir, "GT")
-    os.makedirs(gt_dir, exist_ok=True)
+    
+    evaluate_frame_dir(extractionPath)
+    
+    rmtree(extractionDir)
+
+
+def evaluate_frame_dir(extractionPath):
+    outputPath= os.path.join(extractionDir, "output")
+    inputframe_dir=os.path.join(extractionDir, "inputframe")
+    
+    if op.exists(outputPath):rmtree(outputPath)
+    if op.exists(inputframe_dir):rmtree(inputframe_dir)
+    
+    os.makedirs(outputPath, exist_ok=True)
+    os.makedirs(inputframe_dir, exist_ok=True)
     
     frames_gt=os.listdir(extractionPath)
     frames_gt.sort()
+    
+    
     print (frames_gt)
     for ind,i in enumerate(frames_gt):
-        if not ind%(args.sf )==0:
-            shutil.move(os.path.join(extractionPath, i), os.path.join(gt_dir, i))
-    
+        if  ind%(args.sf )==0:
+            shutil.copyfile(os.path.join(extractionPath, i), os.path.join(inputframe_dir, i))    
         
         
 
@@ -307,7 +302,7 @@ def evaluate():
         TP = transforms.Compose([revNormalize, transforms.ToPILImage()])
 
     # Load data
-    videoFrames = dataloader.Video(root=extractionPath, transform=transform)
+    videoFrames = dataloader.Video(root=inputframe_dir, transform=transform)
     videoFramesloader = torch.utils.data.DataLoader(videoFrames, batch_size=args.batch_size, shuffle=False)
 
     # Initialize model
@@ -332,7 +327,7 @@ def evaluate():
     flowComp.load_state_dict(dict1['state_dictFC'])
 
     # Interpolate frames
-    frameCounter = 1
+    frameCounter = 0
 
     '''
     Tqdm 是一个快速，可扩展的Python进度条，可以在 Python 长循环中添加一个进度提示信息，用户只需要封装任意的迭代器 tqdm(iterator)。 
@@ -393,7 +388,8 @@ def evaluate():
                 # Save intermediate frame
                 #保存中间插入的帧
                 for batchIndex in range(args.batch_size):
-                    ttp="%06d.jpg"%(frameCounter + args.sf * batchIndex)
+                    #ttp="%06d.jpg"%(frameCounter + args.sf * batchIndex)
+                    ttp=frames_gt[frameCounter + args.sf * batchIndex]
                     
                     ttp=os.path.join(outputPath, ttp )
                     #print (videoFrames.origDim) #(480, 270)
@@ -406,10 +402,14 @@ def evaluate():
     ssim_kep=[]
     psnr_kep=[]
     for i in os.listdir(outputPath):
-        gt_img=cv2.imread( os.path.join(gt_dir, i) )
+        gt_img=cv2.imread( os.path.join(extractionPath, i) )
         genimg=cv2.imread( os.path.join(outputPath, i) )
+        
+        scale=0.5
+        target_shape=( int(gt_img.shape[1]*scale),   int(gt_img.shape[0]*scale))
         #print (genimg.shape)
-        gt_img=cv2.resize(gt_img, (genimg.shape[1], genimg.shape[0]))
+        gt_img=cv2.resize(gt_img, target_shape)
+        genimg=cv2.resize(genimg, target_shape)
         
         psnr=skimage.measure.compare_psnr(gt_img, genimg, 255)
         ssim=skimage.measure.compare_ssim(gt_img, genimg, multichannel=True)
@@ -422,9 +422,32 @@ def evaluate():
     #create_video(outputPath)
 
     # Remove temporary files
-    rmtree(extractionDir)
+    rmtree(outputPath)
+    rmtree(inputframe_dir)
 
-    exit(0)
-
+ucf_path=r'/media/sherl/本地磁盘/data_DL/UCF101_results'
+middleburey_path=r"/media/sherl/本地磁盘/data_DL/eval-color-allframes"
+slowflow_train="/media/sherl/本地磁盘/data_DL/slow_flow/slow_flow_teaser/sequence"  #
+MPI_sintel_clean="/media/sherl/本地磁盘/data_DL/MPI_Sintel/MPI-Sintel-complete/training/clean"
 #main()
-evaluate()
+#evaluate_video()
+
+def eval_rootdir(rdir):
+    for i in os.listdir(rdir):
+        tepdir=op.join(rdir, i)
+        evaluate_frame_dir(tepdir)
+
+eval_rootdir(slowflow_train)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
