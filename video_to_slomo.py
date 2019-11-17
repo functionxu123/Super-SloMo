@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-import os,shutil
+import os,shutil,time
 import os.path
 import ctypes
 from shutil import rmtree, move
@@ -351,7 +351,7 @@ def evaluate_frame_dir(extractionPath):
                 pass
                 #(TP(frame0[batchIndex].detach())).resize(videoFrames.origDim, Image.BILINEAR).save(os.path.join(outputPath, str(frameCounter + args.sf * batchIndex) + ".jpg"))
             frameCounter += 1
-
+            sttime=time.time()
             # Generate intermediate frames
             for intermediateIndex in range(1, args.sf):
                 t = intermediateIndex / args.sf
@@ -395,7 +395,7 @@ def evaluate_frame_dir(extractionPath):
                     #print (videoFrames.origDim) #(480, 270)
                     (TP(Ft_p[batchIndex].cpu().detach())).save( ttp)
                 frameCounter += 1
-            
+            print ("run %d iters, time:%f"%(args.sf-1, time.time()-sttime))
             # Set counter accounting for batching of frames
             frameCounter += args.sf * (args.batch_size - 1)
     
@@ -406,7 +406,10 @@ def evaluate_frame_dir(extractionPath):
         genimg=cv2.imread( os.path.join(outputPath, i) )
         
         scale=0.5
-        target_shape=( int(gt_img.shape[1]*scale),   int(gt_img.shape[0]*scale))
+        if scale>0:
+            target_shape=( int(gt_img.shape[1]*scale),   int(gt_img.shape[0]*scale))
+        else:
+            target_shape=( genimg.shape[1],   genimg.shape[0])
         #print (genimg.shape)
         gt_img=cv2.resize(gt_img, target_shape)
         genimg=cv2.resize(genimg, target_shape)
