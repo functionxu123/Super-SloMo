@@ -263,7 +263,7 @@ def evaluate_video(invideopath):
     if error:
         print(error)
         exit(1)
-    
+    print("evaluating video:",invideopath)
     evaluate_frame_dir(extractionPath)
     
     rmtree(extractionDir)
@@ -446,6 +446,7 @@ MPI_sintel_clean="/media/sherl/本地磁盘/data_DL/MPI_Sintel/MPI-Sintel-comple
 def eval_videodir(inpath="testing_gif"):
     for i in os.listdir(inpath):
         tep=op.join(inpath, i)
+        
         evaluate_video(tep)
     
 eval_videodir()
