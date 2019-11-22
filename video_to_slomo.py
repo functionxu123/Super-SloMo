@@ -414,7 +414,8 @@ def evaluate_frame_dir(extractionPath):
         gt_img=cv2.imread( os.path.join(extractionPath, i) )
         genimg=cv2.imread( os.path.join(outputPath, i) )
         
-        scale=0.5
+        #scale>0表示将标签图分辨率乘scale为目的分辨率，小于0表示使用生成图像分辨率
+        scale=1
         if scale>0:
             target_shape=( int(gt_img.shape[1]*scale),   int(gt_img.shape[0]*scale))
         else:
