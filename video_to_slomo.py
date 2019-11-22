@@ -280,7 +280,7 @@ def evaluate_frame_dir(extractionPath):
             shutil.copyfile(os.path.join(extractionPath, i), os.path.join(inputframe_dir, i))    
         
         
-
+    video_time=time.time()
     # Initialize transforms
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -395,7 +395,7 @@ def evaluate_frame_dir(extractionPath):
                     #print (videoFrames.origDim) #(480, 270)
                     (TP(Ft_p[batchIndex].cpu().detach())).save( ttp)
                 frameCounter += 1
-            print ("run %d iters, time:%f"%(args.sf-1, time.time()-sttime))
+            print ("run %d iters, time:%f ,average:%f s/iter"%(args.sf-1, time.time()-sttime, (time.time()-sttime)/(args.sf-1) )  )   
             # Set counter accounting for batching of frames
             frameCounter += args.sf * (args.batch_size - 1)
     
@@ -421,6 +421,7 @@ def evaluate_frame_dir(extractionPath):
         ssim_kep.append(ssim)
     print ("mean psnr:", np.mean(psnr_kep))
     print ("mean ssim:", np.mean(ssim_kep))
+    print ("this video time used:",time.time()-video_time)
     # Generate video from interpolated frames
     #create_video(outputPath)
 
