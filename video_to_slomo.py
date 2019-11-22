@@ -18,11 +18,11 @@ import os.path as op
 
 # For parsing commandline arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("--ffmpeg_dir", type=str, default="/usr/bin/", help='path to ffmpeg.exe')
+parser.add_argument("--ffmpeg_dir", type=str, default="", help='path to ffmpeg.exe')
 parser.add_argument("--video", type=str, default="/home/sherl/workspaces/git/use_tensorflow/use_tensor/GAN_slomo/testing_gif/car-turn.mp4", help='path of video to be converted')
 parser.add_argument("--checkpoint", type=str, default="SuperSloMo.ckpt", help='path of checkpoint for pretrained model')
 parser.add_argument("--fps", type=float, default=30, help='specify fps of output video. Default: 30.')
-parser.add_argument("--sf", type=int, default=32, help='specify the slomo factor N. This will increase the frames by Nx. Example sf=2 ==> 2x frames')
+parser.add_argument("--sf", type=int, default=2, help='specify the slomo factor N. This will increase the frames by Nx. Example sf=2 ==> 2x frames')
 parser.add_argument("--batch_size", type=int, default=1, help='Specify batch size for faster conversion. This will depend on your cpu/gpu memory. Default: 1')
 parser.add_argument("--output", type=str, default="nvidia_output.mp4", help='Specify output file name. Default: nvidia_output.mp4')
 args = parser.parse_args()
@@ -68,13 +68,22 @@ def extract_frames(video, outDir):
             Error message if error occurs otherwise blank string.
     """
 
-
+    '''
     error = ""
     print('{} -i {} -vsync 0 -qscale:v 2 {}/%06d.jpg'.format(os.path.join(args.ffmpeg_dir, "ffmpeg"), video, outDir))
     retn = os.system('{} -i {} -vsync 0 -qscale:v 2 {}/%06d.jpg'.format(os.path.join(args.ffmpeg_dir, "ffmpeg"), video, outDir))
     if retn:
         error = "Error converting file:{}. Exiting.".format(video)
     return error
+    '''
+    os.makedirs(outDir, exist_ok=True)
+    vc=cv2.VideoCapture(video)
+    cnt=0
+    suc=True
+    while suc:
+        suc,frame=vc.read()
+        if suc: cv2.imwrite(   op.join(outDir,  "%06d.jpg"%cnt), frame)
+        cnt+=1
 
 def create_video(dir):
     error = ""
@@ -434,14 +443,20 @@ middleburey_path=r"/media/sherl/本地磁盘/data_DL/eval-color-allframes"
 slowflow_train="/media/sherl/本地磁盘/data_DL/slow_flow/slow_flow_teaser/sequence"  #
 MPI_sintel_clean="/media/sherl/本地磁盘/data_DL/MPI_Sintel/MPI-Sintel-complete/training/clean"
 #main()
-#evaluate_video()
+def eval_videodir(inpath="testing_gif"):
+    for i in os.listdir(inpath):
+        tep=op.join(inpath, i)
+        evaluate_video(tep)
+    
+eval_videodir()
+
 
 def eval_rootdir(rdir):
     for i in os.listdir(rdir):
         tepdir=op.join(rdir, i)
         evaluate_frame_dir(tepdir)
 
-eval_rootdir(slowflow_train)
+#eval_rootdir(slowflow_train)
     
     
     
