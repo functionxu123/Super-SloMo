@@ -266,6 +266,7 @@ def evaluate_video(invideopath):
         exit(1)
     print("evaluating video:",invideopath)
     evaluate_frame_dir(extractionPath)
+    print("evaluating video done:",invideopath)
     
     rmtree(extractionDir)
 
