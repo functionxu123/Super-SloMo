@@ -12,9 +12,10 @@ import model
 import dataloader
 import platform
 from tqdm import tqdm
-import cv2,skimage
+import cv2,skimage,platform
 import numpy as np
 import os.path as op
+sys = platform.system()
 
 # For parsing commandline arguments
 parser = argparse.ArgumentParser()
@@ -444,7 +445,18 @@ middleburey_path=r"/media/sherl/本地磁盘/data_DL/eval-color-allframes"
 slowflow_train="/media/sherl/本地磁盘/data_DL/slow_flow/slow_flow_teaser/sequence"  #
 MPI_sintel_clean="/media/sherl/本地磁盘/data_DL/MPI_Sintel/MPI-Sintel-complete/training/clean"
 #main()
-def eval_videodir(inpath="testing_gif"):
+
+homepath=os.path.expanduser('~')
+DL_path=r'/media/sherl/本地磁盘/data_DL'
+
+
+if sys == "Windows":
+    homepath="D:/DL_model"
+    DL_path="D:/data_DL"
+    
+inputvideodir=op.join(DL_path, "my_test_viedeos")
+
+def eval_videodir(inpath=inputvideodir):
     for i in os.listdir(inpath):
         tep=op.join(inpath, i)
         
